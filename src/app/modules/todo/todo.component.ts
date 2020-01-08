@@ -1,48 +1,49 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
+import { TodoEntity } from "./reducers/list.reducer";
+import { Observable } from "rxjs";
+import { Store } from "@ngrx/store";
+import { TodoState, selectAllTodos } from "./reducers";
+import * as listActions from "./actions/list.actions";
 
 const fakeTodos = [
-  { id: '1', description: 'Change kitty litter', completed: false },
-  { id: '2', description: 'Go grocery shopping', completed: false },
-  { id: '3', description: 'Replace stove light bulb', completed: false },
+  { id: "1", description: "Change kitty litter", completed: false },
+  { id: "2", description: "Go grocery shopping", completed: false },
+  { id: "3", description: "Replace stove light bulb", completed: false }
 ];
 
 @Component({
-  selector: 'app-todo',
-  templateUrl: './todo.component.html',
-  styleUrls: ['./todo.component.scss']
+  selector: "app-todo",
+  templateUrl: "./todo.component.html",
+  styleUrls: ["./todo.component.scss"]
 })
 export class TodoComponent implements OnInit {
-  todoList: Todo[] = [];
-  itemIndex = 4;
+  todoList$: Observable<TodoEntity[]>;
 
-  constructor() { }
+  constructor(private store: Store<TodoState>) {}
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.todoList$ = this.store.select(selectAllTodos);
+  }
 
   loadList() {
-    this.todoList = [...fakeTodos];
+    this.store.dispatch(listActions.loadItems());
+    // this.todoList = [...fakeTodos];
   }
 
   add(item: HTMLInputElement) {
-    const newItem = {
-      id: 'T' + this.itemIndex++,
-      description: item.value,
-      completed: false
-    };
-    this.todoList.push(newItem);
+    this.store.dispatch(listActions.addListItem({ description: item.value }));
+    // const newItem = {
+    //   id: 'T' + this.itemIndex++,
+    //   description: item.value,
+    //   completed: false
+    // };
+    // this.todoList.push(newItem);
   }
 
-  remove(itemToRemove: Todo) {
-    const filteredList =
-      this.todoList.filter(todo => todo.id !== itemToRemove.id);
-
-    this.todoList = [...filteredList];
+  remove(itemToRemove: TodoEntity) {
+    this.store.dispatch(listActions.removeListItem({ payload: itemToRemove }));
+    // const filteredList =
+    //   this.todoList.filter(todo => todo.id !== itemToRemove.id);
+    // this.todoList = [...filteredList];
   }
-
-}
-
-interface Todo {
-  id: string;
-  description: string;
-  completed: boolean;
 }
