@@ -13,7 +13,7 @@ import { TodoEntity } from '../todo/todo.entity';
 
 // https://ngrx.io/guide/data/entity-collection-service
 // https://ngrx.io/guide/data/entity-services
-@Injectable({ providedIn: "root" })
+@Injectable({ providedIn: "root" }) 
 export class TodoService extends EntityCollectionServiceBase<TodoEntity> {
   constructor(serviceElementsFactory: EntityCollectionServiceElementsFactory) {
     super("Todos", serviceElementsFactory);

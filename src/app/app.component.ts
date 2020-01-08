@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { AppState } from "./reducers/index";
 import * as appActions from "./actions/app.actions";
 
 @Component({
@@ -11,7 +10,5 @@ import * as appActions from "./actions/app.actions";
 export class AppComponent {
   title = "ngrx-example-app";
 
-  constructor(private store: Store<AppState>) {
-    store.dispatch(appActions.applicationStarted());
-  }
+  
 }
