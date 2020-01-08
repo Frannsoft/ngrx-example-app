@@ -1,49 +1,54 @@
-import { Component, OnInit } from "@angular/core";
-import { TodoEntity } from "./reducers/list.reducer";
+import { Component } from "@angular/core";
 import { Observable } from "rxjs";
-import { Store } from "@ngrx/store";
-import { TodoState, selectAllTodos } from "./reducers";
-import * as listActions from "./actions/list.actions";
-
-const fakeTodos = [
-  { id: "1", description: "Change kitty litter", completed: false },
-  { id: "2", description: "Go grocery shopping", completed: false },
-  { id: "3", description: "Replace stove light bulb", completed: false }
-];
+import { TodoService } from "./../services/todo.service";
+import { TodoEntity } from './todo.entity';
 
 @Component({
   selector: "app-todo",
   templateUrl: "./todo.component.html",
   styleUrls: ["./todo.component.scss"]
 })
-export class TodoComponent implements OnInit {
+export class TodoComponent {
+  loading$: Observable<boolean>;
   todoList$: Observable<TodoEntity[]>;
 
-  constructor(private store: Store<TodoState>) {}
-
-  ngOnInit() {
-    this.todoList$ = this.store.select(selectAllTodos);
+  constructor(private todoService: TodoService) {
+    this.todoList$ = todoService.entities$;
+    this.loading$ = todoService.loading$;
   }
 
   loadList() {
-    this.store.dispatch(listActions.loadItems());
-    // this.todoList = [...fakeTodos];
+    this.getTodos();
   }
 
-  add(item: HTMLInputElement) {
-    this.store.dispatch(listActions.addListItem({ description: item.value }));
-    // const newItem = {
-    //   id: 'T' + this.itemIndex++,
-    //   description: item.value,
-    //   completed: false
-    // };
-    // this.todoList.push(newItem);
+  getTodos() {
+    this.todoService.getAll();
   }
 
-  remove(itemToRemove: TodoEntity) {
-    this.store.dispatch(listActions.removeListItem({ payload: itemToRemove }));
-    // const filteredList =
-    //   this.todoList.filter(todo => todo.id !== itemToRemove.id);
-    // this.todoList = [...filteredList];
+  // Changed this from taking a TodoEntity to a description string
+  // since the input's value is what is being passed in here.
+  add(description: string) {
+    const todoEntity = {
+      description,
+      completed: false
+    } as TodoEntity;
+
+    this.todoService.add(todoEntity);
+  }
+
+  //This required a change to the api to get working.
+  //TodoService extends EntityCollectionServiceBase<TodoEntity> and
+  //EntityCollectionServiceBase<T>.delete() takes a param of id:string | number
+  //https://ngrx.io/api/data/EntityCollectionDataService
+
+  //To make this change locally in your api, the TodosController.deleteTodo() should look like:
+  /*
+   * @Delete(':id')
+   * deleteTodo(@Param() params) {
+   *  this.todosService.deleteTodo(params.id);
+   * }
+   */
+  remove(todo: TodoEntity) {
+    this.todoService.delete(todo.id);
   }
 }
